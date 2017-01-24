@@ -18,9 +18,9 @@ import (
 	"github.com/raintank/worldping-api/pkg/log"
 	m "github.com/raintank/worldping-api/pkg/models"
 	"github.com/rakyll/globalconf"
+	"github.com/zzphamvanthanhzz/znet-agent-window/scheduler"
 	"github.com/zzphamvanthanhzz/znet-agent/probe"
 	"github.com/zzphamvanthanhzz/znet-agent/publisher"
-	"github.com/zzphamvanthanhzz/znet-agent/scheduler"
 )
 
 const Version int = 1

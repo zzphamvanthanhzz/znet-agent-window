@@ -33,7 +33,7 @@ func (s *Scheduler) CheckHealth() {
 					hcheckrets <- 1
 					return
 				}
-				resp, err := client.Do(req)
+				_, err = client.Do(req)
 				if err != nil {
 					log.Error(3, "Unhealthy when checking host: %s failed with err: %s", h.String(), err.Error())
 					hcheckrets <- 1
