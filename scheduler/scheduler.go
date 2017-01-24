@@ -8,7 +8,7 @@ import (
 
 	"github.com/raintank/worldping-api/pkg/log"
 	m "github.com/raintank/worldping-api/pkg/models"
-	"github.com/zzphamvanthanhzz/znet-agent/checks"
+	"github.com/zzphamvanthanhzz/znet-agent-window/checks"
 	"github.com/zzphamvanthanhzz/znet-agent/probe"
 	"github.com/zzphamvanthanhzz/znet-agent/publisher"
 	"gopkg.in/raintank/schema.v1"
