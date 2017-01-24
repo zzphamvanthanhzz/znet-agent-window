@@ -260,7 +260,7 @@ func (p *FunctionTCP) Run() (CheckResult, error) {
 	sockaddr := fmt.Sprintf("%s:%d", p.Ip, p.Port)
 
 	step := time.Now()
-	_, err = net.DialTimeout("tcp", sockaddr, p.Timeout)
+	_, err := net.DialTimeout("tcp", sockaddr, p.Timeout)
 	if err != nil {
 		msg := fmt.Sprintf("TCP: Error connect to sock: %s with err: %s", sockaddr, err.Error())
 		result.Error = &msg
