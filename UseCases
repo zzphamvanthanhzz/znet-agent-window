@@ -1,0 +1,62 @@
+1_DNS resolve:
+
+[2017-01-23 10:00:35 +0700 ICT][ZALO-OA] [Endpoint]oa_zalo_me ;[ADSL]vnpt_hn ;[Message] STATIC: Error get static link: http://stc.oazalo.brand.zing.vn/media/images/2016/11/16/6bbfe9c466c86ae08ed6b6baa0cb6332.jpg with error: HTTP: Timeout resolving IP addr for stc.oazalo.brand.zing.vn with DNS time: 5.178463 and Default timeout: 5.000000
+
+2_(OK)Display selected probes:
+            scope.init = function () {
+              if (scope.model.route.type === 'byIds') {
+                selectedIds = scope.model.route.config.ids;
+                scope.footprint = { value: "static" };
+              } else {
+                selectedTags = scope.model.route.config.tags;
+                scope.footprint = { value: "dynamic" };
+              }
+              scope.error = false;
+
+              scope.reset(); => ***************this************************
+            };
+
+4_Probes reviews:
+
+
+5_Windows:
+=>Problem : icmp not supported window (ping not work)
+-PING
+-(OK)Static
+-(OK)HTTP
+-(OK)HTTPS
+-TCP
+-(OK)CDNINTE
+-(OK)CLINK
+
+=>health check by http request instead of ping.
+=>in TCP check, no need to ping.
+
+6_(OK)New probe error:
+getProbesForCheck
+boot.f089af0a.js:36 TypeError: Cannot read property 'length' of null
+    at EndpointConfigCtrl.probeCount (endpoint_config.js:292)
+    at fn (eval at compile (boot.f089af0a.js:38), <anonymous>:4:484)
+    at boot.f089af0a.js:36
+    at n.$digest (boot.f089af0a.js:36)
+    at boot.f089af0a.js:36
+    at e (boot.f089af0a.js:35)
+    at boot.f089af0a.js:35
+
+=>`name` in config is `name` column in worldping api database sqlite3
+
+7_(OK)Error when update check:
+TypeError: Cannot read property 'route' of undefined
+    at n.scope.init (all.js:128)
+    at eval (all.js:313)
+    at n.$digest (boot.f089af0a.js:36)
+    at boot.f089af0a.js:36
+    at e (boot.f089af0a.js:35)
+    at boot.f089af0a.js:35
+
+=>Error at: raintank-worldping-app/dist/directives/all.js
+  angular.module('grafana.directives').directive('endpointProbeSelect', function ($compile, $window, $timeout) {
+  ...
+  }
+
+=>Fix: raintank-worldping-app/dist/directives/partials/endpointCollectorSelect.html
