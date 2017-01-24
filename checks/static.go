@@ -413,6 +413,7 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
+					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.http.dataLength" {
@@ -474,6 +475,7 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
+					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.https.dataLength" {
