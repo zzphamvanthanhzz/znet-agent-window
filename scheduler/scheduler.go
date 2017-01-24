@@ -54,7 +54,7 @@ func (i *CheckInstance) Update(c *m.CheckWithSlug, healthy bool) error {
 	}
 
 	i.Lock()
-	if i.Ticker != nil{
+	if i.Ticker != nil {
 		i.Ticker.Stop()
 	}
 	i.Check = c
@@ -316,7 +316,8 @@ func (s *Scheduler) Remove(check *m.CheckWithSlug) {
 func GetCheck(checkType m.CheckType, settings map[string]interface{}) (checkFunction, error) {
 	switch checkType {
 	case m.PING_CHECK:
-		return checks.NewFunctionPing(settings)
+		// return checks.NewFunctionPing(settings)
+		return nil, fmt.Errorf("Ping check is not supported in Window")
 	case m.DNS_CHECK:
 		return checks.NewFunctionDNS(settings)
 	case m.HTTP_CHECK:

@@ -1,11 +1,12 @@
 package scheduler
 
 import (
+	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
 	"github.com/raintank/worldping-api/pkg/log"
-	"github.com/zzphamvanthanhzz/znet-agent/checks"
 )
 
 func (s *Scheduler) CheckHealth() {
@@ -17,34 +18,26 @@ func (s *Scheduler) CheckHealth() {
 		hcheckrets := make(chan int, len(s.HealthHosts))
 		for _, _h := range s.HealthHosts {
 			log.Info("CheckHealth at: %s with host: %s", t.String(), _h)
-			h := _h
+			h, err := url.Parse(_h)
+			if err != nil {
+				log.Error(3, "Invalid host format %s with err %s", h, err.Error())
+				continue
+			}
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				settings := make(map[string]interface{})
-				settings["hostname"] = h
-				settings["timeout"] = float64(2)
-				settings["product"] = "TEST"
-				hchk, err := checks.NewFunctionPing(settings)
+				client := http.Client{Timeout: time.Duration(2) * time.Second}
+				req, err := http.NewRequest("GET", h.String(), nil)
 				if err != nil {
-					log.Error(3, "Error creating healthcheck host: %s failed with err: %s", h, err.Error())
+					log.Error(3, "Error when create health check for host: %s failed with err: %s", h.String(), err.Error())
 					hcheckrets <- 1
 					return
 				}
-				_pingret, err := hchk.Run()
+				resp, err := client.Do(req)
 				if err != nil {
-					log.Error(3, "Error while health checking with host: %s with err: %s with nil result",
-						h, err.Error())
+					log.Error(3, "Unhealthy when checking host: %s failed with err: %s", h.String(), err.Error())
 					hcheckrets <- 1
 					return
-				} else {
-					pingret := _pingret.(*checks.PingResult)
-					if pingret.Error != nil {
-						log.Error(3, "Error while healchecking with host: %s with err: %s not nil result",
-							h, pingret.Error)
-						hcheckrets <- 1
-						return
-					}
 				}
 				hcheckrets <- 0
 				return

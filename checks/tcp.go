@@ -259,40 +259,6 @@ func (p *FunctionTCP) Run() (CheckResult, error) {
 	}
 	sockaddr := fmt.Sprintf("%s:%d", p.Ip, p.Port)
 
-	settings := map[string]interface{}{}
-	settings["product"] = p.Product
-	settings["hostname"] = p.Ip
-	pingFunc, err := NewFunctionPing(settings)
-	if err != nil {
-		msg := fmt.Sprintf("TCP: Error create ping check to sock: %s with err: %s", sockaddr, err.Error())
-		return nil, errors.New(msg)
-	}
-	pingRet, err := pingFunc.Run()
-	if err != nil {
-		msg := fmt.Sprintf("TCP: Error create ping check to sock: %s with err: %s", sockaddr, err.Error())
-		return nil, errors.New(msg)
-	}
-	checkSlug := m.CheckWithSlug{}
-	pingMetrics := pingRet.Metrics(time.Now(), &checkSlug)
-	for _, m := range pingMetrics {
-		if m.Metric == "worldping.ping.loss" {
-			loss = m.Value
-		} else if m.Metric == "worldping.ping.min" {
-			min = m.Value
-		} else if m.Metric == "worldping.ping.max" {
-			max = m.Value
-		} else if m.Metric == "worldping.ping.median" {
-			median = m.Value
-		} else if m.Metric == "worldping.ping.mdev" {
-			mdev = m.Value
-		} else if m.Metric == "worldping.ping.mean" {
-			mean = m.Value
-		}
-	}
-	if pingRet.ErrorMsg() != "" {
-		msg := fmt.Sprintf("TCP: Error with ping to sock: %s with err: %s", sockaddr, pingRet.ErrorMsg())
-		result.Error = &msg
-	}
 	step := time.Now()
 	_, err = net.DialTimeout("tcp", sockaddr, p.Timeout)
 	if err != nil {
