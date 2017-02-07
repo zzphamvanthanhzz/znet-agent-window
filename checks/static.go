@@ -3,14 +3,14 @@ package checks
 import (
 	"errors"
 	"fmt"
-	"math"
-	"net/url"
-	"time"
-
 	"github.com/PuerkitoBio/goquery"
+	"github.com/raintank/worldping-api/pkg/log"
 	m "github.com/raintank/worldping-api/pkg/models"
 	"github.com/zzphamvanthanhzz/znet-agent/probe"
 	"gopkg.in/raintank/schema.v1"
+	"math"
+	"net/url"
+	"time"
 )
 
 type STATICResult struct {
@@ -387,7 +387,7 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 			checkSlug := m.CheckWithSlug{}
 			_retMetricsData := ret.Metrics(time.Now(), &checkSlug)
 			for _, m := range _retMetricsData {
-				fmt.Println("STATIC: ", link, m.Metric, m.Value)
+				log.Debug("STATIC: ", link, m.Metric, m.Value)
 				if m.Metric == "worldping.http.dns" {
 					dns = *(result.DNS) + m.Value
 					result.DNS = &dns
@@ -413,7 +413,6 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
-					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.http.dataLength" {
@@ -475,7 +474,6 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
-					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.https.dataLength" {
