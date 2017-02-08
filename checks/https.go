@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/raintank/worldping-api/pkg/log"
 	"io"
 	"io/ioutil"
 	"net"
@@ -511,7 +512,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 	}
 
 	//Read body
-	step = time.Now()
+	rstep := time.Now()
 	buf := make([]byte, 1024)
 	var body bytes.Buffer
 	datasize := 0
@@ -521,7 +522,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 		if err != nil {
 			if err == io.EOF {
 				datasize += count
-				fmt.Printf("HTTPS: %s EOF with size: %d \n content: %s\n", p.Host, datasize, body.String())
+				// fmt.Printf("HTTPS: %s EOF with size: %d \n content: %s\n", p.Host, datasize, body.String())
 				break
 			} else {
 				msg := fmt.Sprintf("HTTPS: Error reading body from conn: %s with err: %s", sockaddr, err.Error())
@@ -534,8 +535,10 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 			break
 		}
 	}
-	recv := time.Since(step).Seconds() * 1000
-	total := time.Since(start).Seconds() * 1000
+	time.Sleep(time.Millisecond * time.Duration(1))
+	recv := float64(time.Since(rstep).Nanoseconds())/1000/1000 - 1.0
+
+	total := time.Since(start).Seconds()*1000 - 1
 	result.Recv = &recv
 	result.Total = &total
 	if time.Now().Sub(deadline).Seconds() > 0.0 {
@@ -547,7 +550,12 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 	datalength := float64(datasize)
 	result.DataLength = &datalength
 
-	throughput := float64(datasize) * 1000 * 8 / float64(recv) //bit/s
+	throughput := 0.0
+	if recv > 0.0 {
+		throughput = float64(datasize) * 1000 * 8 / recv //bit/s
+	}
+
+	log.Debug("HTTPS: %s recv: %f with data size: %d throughput: %f", p.Path, recv, datasize, throughput)
 	result.Throughput = &throughput
 
 	statuscode := float64(response.StatusCode)
@@ -565,7 +573,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 	//Recursive for 302 code here
 	if statuscode == 302 {
 		redirectLink := response.Header.Get("Location")
-		fmt.Printf("HTTPS: Redirect from %s:%d%s to %s\n", p.Host, p.Port, p.Path, redirectLink)
+		// fmt.Printf("HTTPS: Redirect from %s:%d%s to %s\n", p.Host, p.Port, p.Path, redirectLink)
 		if redirectLink == "" {
 			msg := fmt.Sprintf("HTTPS: Empty Location in redirect Header from ori: %s:%d%s ", p.Host, p.Port, p.Path)
 			result.Error = &msg
