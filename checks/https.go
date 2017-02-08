@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/raintank/worldping-api/pkg/log"
 	"io"
 	"io/ioutil"
 	"net"
@@ -513,7 +512,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 	}
 
 	//Read body
-	rstep := time.Now()
+	step = time.Now()
 	buf := make([]byte, 1024)
 	var body bytes.Buffer
 	datasize := 0
@@ -536,10 +535,9 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 			break
 		}
 	}
-	time.Sleep(time.Millisecond * time.Duration(1))
-	recv := float64(time.Since(rstep).Nanoseconds())/1000/1000 - 1.0
-
-	total := time.Since(start).Seconds()*1000 - 1
+	recv := float64(time.Since(step).Nanoseconds()) / 1000 / 1000
+	log.Error(3, "HTTPS: %s recv: %v", p.Path, recv)
+	total := time.Since(start).Seconds() * 1000
 	result.Recv = &recv
 	result.Total = &total
 	if time.Now().Sub(deadline).Seconds() > 0.0 {
@@ -551,6 +549,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 	datalength := float64(datasize)
 	result.DataLength = &datalength
 
+	//Window interval between 2 time.Now() is about 1ms
 	throughput := 0.0
 	if recv > 0.0 {
 		throughput = float64(datasize) * 1000 * 8 / recv //bit/s
