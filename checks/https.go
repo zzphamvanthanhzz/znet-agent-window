@@ -536,7 +536,7 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 		}
 	}
 	recv := float64(time.Since(step).Nanoseconds()) / 1000 / 1000
-	log.Error(3, "HTTPS: %s recv: %v", p.Path, recv)
+	log.Debug("HTTPS: %s recv: %v", p.Path, recv)
 	total := time.Since(start).Seconds() * 1000
 	result.Recv = &recv
 	result.Total = &total
@@ -564,14 +564,14 @@ func (p *FunctionHTTPS) Run() (CheckResult, error) {
 		msg := fmt.Sprintf("HTTPS: Invalid status code %d from conn: %s", int64(statuscode), sockaddr)
 		result.Error = &msg
 		return result, nil
-	} else if statuscode != 200 && statuscode != 302 && statuscode != 206 {
+	} else if statuscode != 200 && statuscode != 302 && statuscode != 301 && statuscode != 206 {
 		msg := fmt.Sprintf("HTTPS: Error code %d from conn: %s", int64(statuscode), sockaddr)
 		result.Error = &msg
 		return result, nil
 	}
 
 	//Recursive for 302 code here
-	if statuscode == 302 {
+	if statuscode == 302 || statuscode == 301 {
 		redirectLink := response.Header.Get("Location")
 		log.Debug("HTTPS: Redirect from %s:%d%s to %s\n", p.Host, p.Port, p.Path, redirectLink)
 		if redirectLink == "" {
