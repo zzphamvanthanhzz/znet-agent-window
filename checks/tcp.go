@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/raintank/worldping-api/pkg/log"
 	m "github.com/raintank/worldping-api/pkg/models"
 	"github.com/zzphamvanthanhzz/znet-agent/probe"
 	"gopkg.in/raintank/schema.v1"
@@ -258,16 +259,17 @@ func (p *FunctionTCP) Run() (CheckResult, error) {
 		Connect: &connect,
 	}
 	sockaddr := fmt.Sprintf("%s:%d", p.Ip, p.Port)
-
+	log.Error(3, "TCP %s:%d", p.Ip, p.Port)
 	step := time.Now()
 	_, err := net.DialTimeout("tcp", sockaddr, p.Timeout)
 	if err != nil {
 		msg := fmt.Sprintf("TCP: Error connect to sock: %s with err: %s", sockaddr, err.Error())
+		log.Error(3, "TCP %s:%d error %s", p.Ip, p.Port, err.Error())
 		result.Error = &msg
 		return result, nil
 	}
 	connTime := float64(time.Since(step).Seconds() * 1000)
 	result.Connect = &connTime
-
+	log.Error(3, "TCP %s:%d conn %f", p.Ip, p.Port, connTime)
 	return result, nil
 }
