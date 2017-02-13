@@ -387,7 +387,6 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 			checkSlug := m.CheckWithSlug{}
 			_retMetricsData := ret.Metrics(time.Now(), &checkSlug)
 			for _, m := range _retMetricsData {
-				log.Debug("STATIC: ", link, m.Metric, m.Value)
 				if m.Metric == "worldping.http.dns" {
 					dns = *(result.DNS) + m.Value
 					result.DNS = &dns
@@ -410,9 +409,11 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					total = *(result.Total) + m.Value
 					result.Total = &total
 				} else if m.Metric == "worldping.http.throughput" {
+					log.Error(3, "STATIC: link: %s throughput: %f", link, m.Value)
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
+					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.http.dataLength" {
@@ -474,6 +475,7 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 					if !math.IsInf(m.Value, 1) && !math.IsInf(m.Value, -1) {
 						throughput = *(result.Throughput) + m.Value
 						result.Throughput = &throughput
+					} else {
 						remain++
 					}
 				} else if m.Metric == "worldping.https.dataLength" {
@@ -486,22 +488,26 @@ func (p *FunctionSTATIC) Run() (CheckResult, error) {
 
 	totalLink := float64(p.Total - remain)
 	result.TotalLink = &totalLink
+	if totalLink != 0 {
+		dns = *result.DNS / totalLink
+		result.DNS = &dns
+		conn = *result.Connect / totalLink
+		result.Connect = &conn
+		send = *result.Send / totalLink
+		result.Send = &send
+		wait = *result.Wait / totalLink
+		result.Wait = &wait
+		recv = *result.Recv / totalLink
+		result.Recv = &recv
+		total = *result.Total / totalLink
+		result.Total = &total
+		datalength = *result.DataLength / totalLink
+		result.DataLength = &datalength
+		throughput = *result.Throughput / totalLink
+		result.Throughput = &throughput
+	}
 
-	dns = *result.DNS / totalLink
-	result.DNS = &dns
-	conn = *result.Connect / totalLink
-	result.Connect = &conn
-	send = *result.Send / totalLink
-	result.Send = &send
-	wait = *result.Wait / totalLink
-	result.Wait = &wait
-	recv = *result.Recv / totalLink
-	result.Recv = &recv
-	total = *result.Total / totalLink
-	result.Total = &total
-	datalength = *result.DataLength / totalLink
-	result.DataLength = &datalength
-	throughput = *result.Throughput / totalLink
-	result.Throughput = &throughput
+	log.Error(3, "STATIC: product: %s totallink: %f dns: %f connect: %f send: %f wait: %f recv: %f throughput: %f",
+		p.Url, *result.TotalLink, *result.DNS, *result.Connect, *result.Send, *result.Wait, *result.Recv, *result.Throughput)
 	return result, nil
 }
